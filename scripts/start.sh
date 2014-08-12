@@ -17,7 +17,7 @@ if [ "$NODE_ENV" == "" ]; then
     NODE_ENV="local"
 fi
 
-echo "Starting $NODE_ENV configuration..."
+echo "Starting $NODE_ENV node configuration..."
 echo ""
 
 env "NODE_ENV=$NODE_ENV" node ./bin/index.js

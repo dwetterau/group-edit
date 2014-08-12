@@ -14,7 +14,7 @@ echo "Removing existing build..."
 rm -rf ./bin && mkdir ./bin
 cp -r ./src/public ./bin/public
 cp -r ./src/views ./bin/views
-cp -r ./src/ui ./bin/ui
+#cp -r ./src/ui ./bin/ui
 mkdir ./bin/routes
 
 # Compile all coffeescript to js
