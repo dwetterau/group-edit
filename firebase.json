@@ -1,0 +1,9 @@
+{
+    "firebase": "group-edit",
+    "public": "./bin/public",
+    "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+    ]
+}

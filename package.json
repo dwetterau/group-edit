@@ -1,0 +1,41 @@
+{
+    "name": "group-edit",
+    "preferGlobal": false,
+    "private": true,
+    "version": "0.0.0",
+    "description": "Real-time collaborative editing",
+    "main": "index.js",
+    "author": "David Wetterau <david.wetterau@gmail.com>",
+    "scripts": {
+        "start": "chmod +x ./scripts/start.sh && ./scripts/start.sh",
+        "test": "chmod +x ./scripts/test.sh && ./scripts/test.sh"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/dwetterau/group-edit.git"
+    },
+    "keywords": [
+        "collaborative"
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/dwetterau/group-edit/issues"
+    },
+    "dependencies": {
+        "coffee-script": "~1.7.1",
+        "coffeelint": "*",
+        "debug": "~1.0.4",
+        "firebase": "~1.0.18",
+        "morgan": "~1.2.2",
+        "nconf": "~0.6.9",
+        "serve-favicon": "~2.0.1"
+    },
+    "devDependencies": {
+        "chai": "*",
+        "mocha": "*"
+    },
+    "homepage": "https://github.com/dwetterau/group-edit",
+    "engines": {
+        "node": "~0.10.30"
+    }
+}
