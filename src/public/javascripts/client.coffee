@@ -10,8 +10,11 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   sequence_number = 0
 
   # Get our unique id from pushing onto the participants ref
-  participant_name = participants_ref.push {'new': new Date()}
+  participant_name = participants_ref.push {'new_participant': new Date()}
   participant_name = participant_name.name()
+  console.log "Participant name:", participant_name
+
+  string = woot.initialize_string()
 
   # On a new event, we need to try to perform it, and if that fails, add to pool
   events_ref.on 'child_added', (snapshot, previous_child) ->
@@ -25,7 +28,15 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       cursor = utils.get_cursor this
       console.log "cursor index=", cursor
       console.log "content=", @value
+      before_char = ''
+      after_char = ''
       if cursor > 0
-        console.log 'character before:', @value.charAt cursor - 1
+        before_char = @value.charAt cursor - 1
       if cursor <= @value.length - 1
-        console.log 'character after:', @value.charAt cursor
+        after_char = @value.charAt cursor
+      woot_character = woot.insert participant_name, sequence_number, string, k, cursor
+      events_ref.push
+        woot_character: woot_character
+      sequence_number += 1
+      event.stopPropagation()
+      return false
