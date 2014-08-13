@@ -20,21 +20,38 @@ define
   get_character: (string, index) ->
     return string[index]
 
-  get_position: (string, target) ->
+  compare_id: (id1, id2) ->
+    if id1.name == id2.name
+      return id1.number - id2.number
+    else if id1.name < id2.name
+      return -1
+    else if id1.name > id2.name
+      return 1
+    else
+      throw Error('Programming Error in compare_id')
+
+  get_position: (string, target_id) ->
     for character, index in string
-      if character.id.name == target.id.name and character.id.number == target.id.number
+      if character.id.name == target_id.name and character.id.number == target_id.number
        return index
     return -1
 
   insert: (string, character, index) ->
     string.splice(index, 0, character)
 
+  set_visible: (string, index, visible) ->
+    string[index].visible = visible
+
   sub_sequence: (string, start_index, end_index) ->
-    return string.slice(start_index + 1, end_index)
+    return [c.id for c in string.slice(start_index + 1, end_index)]
 
   contains: (string, target) ->
     # TODO(david): Make this not do a linear scan
-    return this.get_position string, target != -1
+    return this.get_position string, target.id != -1
+
+  contains_by_id: (string, target_id) ->
+    # TODO(david): Make this a fast lookup
+    return this.get_position string, target_id != -1
 
   value: (string) ->
     visible_string = ''
@@ -73,3 +90,41 @@ define
 
   generate_delete: (index, string) ->
     return this.ith_visible(string, index)
+
+  is_executable: (operation, character, string) ->
+    if operation == 'delete'
+      return this.contains string, character
+    else if operation == 'insert'
+      return this.contains_by_id(string, character.before_id) and
+          this.contains_by_id(string, character.after_id)
+    else
+      throw Error("Unknown operation type")
+
+  integrate_delete: (string, character) ->
+    index = this.get_position(string, character.id)
+    if index == -1
+      throw Error("Delete preconditions not met")
+    this.set_visible string, index, false
+
+  integrate_insert_helper: (string, character) ->
+    this.integrate_insert_helper string, character, character.before_id, character.after_id
+
+  integrate_insert_helper: (string, character, before_id, after_id) ->
+    # Get the before and after character indices
+    before_index = this.get_position string, before_id
+    after_index = this.get_position string, after_id
+
+    if before_index == -1 or after_index == -1
+      throw Error("Insert preconditions not met")
+
+    sub_sequence = this.sub_sequence(string, before_index, after_index)
+    if sub_sequence.length == 0
+      this.insert string, character, after_index
+    else
+      # Add on the before and after indices again
+      sub_sequence.unshift before_index
+      sub_sequence.push after_index
+      i = 1
+      while i < sub_sequence.length - 1 and this.compare_id(sub_sequence[i], character.id) < 0
+        i += 1
+      this.integrate_insert_helper character, sub_sequence[i - 1], sub_sequence[i]
