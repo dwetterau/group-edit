@@ -71,8 +71,8 @@ define
     return null
 
   generate_insert: (index, visible_string, participant_name, sequence_number, string) ->
-    before_character = this.ith_visible(string, index)
-    after_character = this.ith_visible(string, index + 1)
+    before_character = this.ith_visible(string, index - 1)
+    after_character = this.ith_visible(string, index)
     if not before_character
       before_character = string[0]
     if not after_character

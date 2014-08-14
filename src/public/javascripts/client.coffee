@@ -28,13 +28,6 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     if k
       cursor = utils.get_cursor this
       console.log "cursor index=", cursor
-      console.log "content=", @value
-      before_char = ''
-      after_char = ''
-      if cursor > 0
-        before_char = @value.charAt cursor - 1
-      if cursor <= @value.length - 1
-        after_char = @value.charAt cursor
       woot_character = woot.generate_insert cursor, k, participant_name, sequence_number, string
       woot.integrate_insert string, woot_character
       events_ref.push
