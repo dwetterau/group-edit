@@ -22,7 +22,8 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     # Seems like this approach would have trouble with eventual offline editing
     console.log "Got a new event:", snapshot.val()
 
-  $('#input').keypress (event) ->
+  $('#input').keypress((event) ->
+    console.log event.keyCode
     k = String.fromCharCode event.which
     console.log "key pressed:", k
     if k
@@ -36,3 +37,19 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       @value = woot.value(string)
       event.stopPropagation()
       return false
+  ).keydown (event) ->
+    if event.keyCode == 8
+      # This is the case for backspace
+      console.log "doing backspace"
+      cursor = utils.get_cursor this
+      console.log "cursor_index=", cursor
+      woot_character = woot.generate_delete cursor - 1, string
+      if woot_character
+        # We have a visible character to delete
+        woot.integrate_delete string, woot_character
+        events_ref.push
+          woot_character: woot_character
+        sequence_number += 1
+        @value = woot.value(string)
+        event.stopPropagation()
+        return false
