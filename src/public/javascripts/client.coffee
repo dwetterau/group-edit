@@ -20,6 +20,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   events_ref.on 'child_added', (snapshot, previous_child) ->
     # TODO(david): Investigate if we can leverage the child's name to serialize all operations.
     # Seems like this approach would have trouble with eventual offline editing
+    console.log "Got a new event:", snapshot.val()
 
   $('#input').keypress (event) ->
     k = String.fromCharCode event.which
@@ -34,9 +35,11 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
         before_char = @value.charAt cursor - 1
       if cursor <= @value.length - 1
         after_char = @value.charAt cursor
-      woot_character = woot.insert participant_name, sequence_number, string, k, cursor
+      woot_character = woot.generate_insert cursor, k, participant_name, sequence_number, string
+      woot.integrate_insert string, woot_character
       events_ref.push
         woot_character: woot_character
       sequence_number += 1
+      @value = woot.value(string)
       event.stopPropagation()
       return false

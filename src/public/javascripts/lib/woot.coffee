@@ -33,7 +33,7 @@ define
   get_position: (string, target_id) ->
     for character, index in string
       if character.id.name == target_id.name and character.id.number == target_id.number
-       return index
+        return index
     return -1
 
   insert: (string, character, index) ->
@@ -43,7 +43,7 @@ define
     string[index].visible = visible
 
   sub_sequence: (string, start_index, end_index) ->
-    return [c.id for c in string.slice(start_index + 1, end_index)]
+    return (c.id for c in string.slice(start_index + 1, end_index))
 
   contains: (string, target) ->
     # TODO(david): Make this not do a linear scan
@@ -106,7 +106,7 @@ define
       throw Error("Delete preconditions not met")
     this.set_visible string, index, false
 
-  integrate_insert_helper: (string, character) ->
+  integrate_insert: (string, character) ->
     this.integrate_insert_helper string, character, character.before_id, character.after_id
 
   integrate_insert_helper: (string, character, before_id, after_id) ->
@@ -122,9 +122,9 @@ define
       this.insert string, character, after_index
     else
       # Add on the before and after indices again
-      sub_sequence.unshift before_index
-      sub_sequence.push after_index
+      sub_sequence.unshift before_id
+      sub_sequence.push after_id
       i = 1
       while i < sub_sequence.length - 1 and this.compare_id(sub_sequence[i], character.id) < 0
         i += 1
-      this.integrate_insert_helper character, sub_sequence[i - 1], sub_sequence[i]
+      this.integrate_insert_helper string, character, sub_sequence[i - 1], sub_sequence[i]
