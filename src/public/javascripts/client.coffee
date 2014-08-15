@@ -17,6 +17,32 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   string = woot.initialize_string()
   applied_ops = {}
   operation_list = []
+  pending_operation_list = []
+  initialized = false
+
+  # On page load, load the list of all operations, perform them once.
+  events_ref.once 'value', (data) ->
+    all_objects = data.val()
+    for key, operation_object of all_objects
+      operation_list.push operation_object
+      utils.add_applied_op applied_ops, operation_object.operation, operation_object.character
+    while operation_list.length > 0
+      utils.process_op operation_list, string
+    element = $('#input')
+    string_representation = woot.value string
+    element.val string_representation
+    console.log string_representation
+    utils.set_cursor(element, string_representation.length - 1)
+
+    # We have to start putting new operations in the real list before we move
+    # the pending ones over.
+    initialized = true
+    for operation_object in pending_operation_list
+      operation = operation_object.operation
+      character = operation_object.character
+      # Only move over pending operations that haven't been locally applied
+      if not utils.check_applied_op applied_ops, operation, character
+        operation_list.push operation_object
 
   # On a new event, we need to try to perform it, and if that fails, add to pool
   events_ref.on 'child_added', (snapshot, previous_child) ->
@@ -29,7 +55,11 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       return
 
     # TODO(david): Investigate if it's faster to unshift or push here
-    operation_list.push operation_object
+    if initialized
+      operation_list.push operation_object
+      apply_operations()
+    else
+      pending_operation_list.push operation_object
 
   $('#input').keypress((event) ->
     k = String.fromCharCode event.which
@@ -63,7 +93,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
         event.stopPropagation()
         return false
 
-  setInterval () ->
+  apply_operations = () ->
     # Try to process all of the pending operations
     iterations = operation_list.length
     should_update = false
@@ -81,4 +111,5 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       # when to move the cursor one over or when to leave it where it is...
       # idea!: leverage WOOT to store the cursor position also.
       utils.set_cursor(element, utils.get_cursor element)
-  , 100
+
+  setInterval apply_operations, 100
