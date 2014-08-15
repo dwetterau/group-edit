@@ -47,11 +47,11 @@ define ['lib/constants'], (constants) ->
 
   contains: (string, target) ->
     # TODO(david): Make this not do a linear scan
-    return this.get_position string, target.id != -1
+    return this.get_position(string, target.id) != -1
 
   contains_by_id: (string, target_id) ->
     # TODO(david): Make this a fast lookup
-    return this.get_position string, target_id != -1
+    return this.get_position(string, target_id) != -1
 
   value: (string) ->
     visible_string = ''

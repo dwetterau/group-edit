@@ -32,7 +32,6 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     operation_list.push operation_object
 
   $('#input').keypress((event) ->
-    console.log event.keyCode
     k = String.fromCharCode event.which
     if k
       cursor = utils.get_cursor this
@@ -65,8 +64,14 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
         return false
 
   setInterval () ->
-    need_to_update_input = utils.process_op operation_list, string
-    if need_to_update_input
+    # Try to process all of the pending operations
+    iterations = operation_list.length
+    should_update = false
+    while iterations > 0
+      iterations--
+      need_to_update_input = utils.process_op operation_list, string
+      should_update |= need_to_update_input
+    if should_update
       # We need to update the text content with the new value and
       # move the cursor back to where it was...
       element = $('#input')
@@ -74,5 +79,6 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       # TODO(david): Eliminate cursor creep, you losing your spot because someone else typed
       # something earlier in the string than where you were. Basically we need to figure out
       # when to move the cursor one over or when to leave it where it is...
+      # idea!: leverage WOOT to store the cursor position also.
       utils.set_cursor(element, utils.get_cursor element)
   , 100
