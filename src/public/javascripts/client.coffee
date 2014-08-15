@@ -35,6 +35,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
         woot_character: woot_character
       sequence_number += 1
       @value = woot.value(string)
+      utils.set_cursor this, cursor + 1
       event.stopPropagation()
       return false
   ).keydown (event) ->
@@ -51,5 +52,6 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
           woot_character: woot_character
         sequence_number += 1
         @value = woot.value(string)
+        utils.set_cursor this, cursor - 1
         event.stopPropagation()
         return false

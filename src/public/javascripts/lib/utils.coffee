@@ -14,3 +14,15 @@ define
       rc.setEndPoint 'EndToStart', re
       return rc.text.length
     return 0
+
+  set_cursor: (element, index) ->
+    if element.createTextRange
+      range = element.createTextRange()
+      range.move 'character', index
+      range.select()
+    else
+      if element.selectionStart
+        element.focus()
+        element.setSelectionRange index, index
+      else
+        element.focus()
