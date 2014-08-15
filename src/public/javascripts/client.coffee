@@ -15,43 +15,64 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   console.log "Participant name:", participant_name
 
   string = woot.initialize_string()
+  applied_ops = {}
+  operation_list = []
 
   # On a new event, we need to try to perform it, and if that fails, add to pool
   events_ref.on 'child_added', (snapshot, previous_child) ->
-    # TODO(david): Investigate if we can leverage the child's name to serialize all operations.
-    # Seems like this approach would have trouble with eventual offline editing
-    console.log "Got a new event:", snapshot.val()
+    operation_object = snapshot.val()
+    operation = operation_object.operation
+    character = operation_object.character
+
+    # Ignore locally applied events
+    if utils.check_applied_op applied_ops, operation, character
+      return
+
+    # TODO(david): Investigate if it's faster to unshift or push here
+    operation_list.push operation_object
 
   $('#input').keypress((event) ->
     console.log event.keyCode
     k = String.fromCharCode event.which
-    console.log "key pressed:", k
     if k
       cursor = utils.get_cursor this
-      console.log "cursor index=", cursor
       woot_character = woot.generate_insert cursor, k, participant_name, sequence_number, string
       woot.integrate_insert string, woot_character
-      events_ref.push
-        woot_character: woot_character
+      utils.add_applied_op applied_ops, constants.INSERT_OPERATION, woot_character
       sequence_number += 1
       @value = woot.value(string)
       utils.set_cursor this, cursor + 1
+
+      utils.send_op(events_ref, constants.INSERT_OPERATION, woot_character)
       event.stopPropagation()
       return false
+
   ).keydown (event) ->
     if event.keyCode == 8
       # This is the case for backspace
-      console.log "doing backspace"
       cursor = utils.get_cursor this
-      console.log "cursor_index=", cursor
       woot_character = woot.generate_delete cursor - 1, string
       if woot_character
         # We have a visible character to delete
         woot.integrate_delete string, woot_character
-        events_ref.push
-          woot_character: woot_character
+        utils.add_applied_op applied_ops, constants.DELETE_OPERATION, woot_character
         sequence_number += 1
         @value = woot.value(string)
         utils.set_cursor this, cursor - 1
+
+        utils.send_op events_ref, constants.DELETE_OPERATION, woot_character
         event.stopPropagation()
         return false
+
+  setInterval () ->
+    need_to_update_input = utils.process_op operation_list, string
+    if need_to_update_input
+      # We need to update the text content with the new value and
+      # move the cursor back to where it was...
+      element = $('#input')
+      element.val woot.value string
+      # TODO(david): Eliminate cursor creep, you losing your spot because someone else typed
+      # something earlier in the string than where you were. Basically we need to figure out
+      # when to move the cursor one over or when to leave it where it is...
+      utils.set_cursor(element, utils.get_cursor element)
+  , 100

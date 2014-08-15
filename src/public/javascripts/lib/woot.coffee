@@ -1,4 +1,4 @@
-define
+define ['lib/constants'], (constants) ->
   initialize_string: () ->
     begin_character =
       id:
@@ -91,10 +91,23 @@ define
   generate_delete: (index, string) ->
     return this.ith_visible(string, index)
 
+  execute_operation: (operation, character, string) ->
+    if not this.is_executable operation, character, string
+      return false
+
+    if operation == constants.DELETE_OPERATION
+      this.integrate_delete string, character
+    else if operation == constants.INSERT_OPERATION
+      this.integrate_insert string, character
+    else
+      throw Error("Unknown operation type")
+
+    return true
+
   is_executable: (operation, character, string) ->
-    if operation == 'delete'
+    if operation == constants.DELETE_OPERATION
       return this.contains string, character
-    else if operation == 'insert'
+    else if operation == constants.INSERT_OPERATION
       return this.contains_by_id(string, character.before_id) and
           this.contains_by_id(string, character.after_id)
     else

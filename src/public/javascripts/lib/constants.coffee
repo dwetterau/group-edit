@@ -4,3 +4,6 @@ define
   TEST_CHILD: 'TEST_CHILD'
   EVENTS_CHILD: 'events'
   PARTICIPANTS_CHILD: 'participants'
+
+  INSERT_OPERATION: 'insert'
+  DELETE_OPERATION: 'delete'
