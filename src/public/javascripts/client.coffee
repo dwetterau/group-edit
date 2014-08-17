@@ -28,11 +28,9 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   woot_state.events_ref.once 'value', (data) ->
     all_objects = data.val()
     for key, operation_object of all_objects
-      operation_list.push operation_object
-      utils.add_applied_op(
-        woot_state.applied_ops, operation_object.operation, operation_object.character)
+      unpack_and_push_operation operation_object, operation_list
     while operation_list.length > 0
-      utils.process_op operation_list, woot_state.string
+      utils.process_op operation_list, woot_state.string, woot_state.applied_ops
     element = $('#input')
     string_representation = woot.value woot_state.string
     element.val string_representation
@@ -48,9 +46,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       if not utils.check_applied_op woot_state.applied_ops, operation, character
         operation_list.push operation_object
 
-  # On a new event, we need to try to perform it, and if that fails, add to pool
-  woot_state.events_ref.on 'child_added', (snapshot, previous_child) ->
-    operation_object = snapshot.val()
+  push_operation = (operation_object, list) ->
     operation = operation_object.operation
     character = operation_object.character
 
@@ -59,11 +55,28 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       return
 
     # TODO(david): Investigate if it's faster to unshift or push here
+    list.push operation_object
+
+  unpack_and_push_operation = (operation_object, list) ->
+    if operation_object.is_bulk
+      # Unpack the operation object into many operations
+      for character in operation_object.character_list
+        new_operation_object =
+          operation: operation_object.operation
+          character: character
+        push_operation new_operation_object, list
+    else
+      push_operation operation_object, list
+
+  # On a new event, we need to try to perform it, and if that fails, add to pool
+  woot_state.events_ref.on 'child_added', (snapshot, previous_child) ->
+    operation_object = snapshot.val()
+
     if initialized
-      operation_list.push operation_object
+      unpack_and_push_operation operation_object, operation_list
       apply_operations()
     else
-      pending_operation_list.push operation_object
+      unpack_and_push_operation operation_object, pending_operation_list
 
   input_element = $('#input')
   keydown_extended = true
@@ -82,7 +95,8 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     should_update = false
     while iterations > 0
       iterations--
-      need_to_update_input = utils.process_op operation_list, woot_state.string
+      need_to_update_input = utils.process_op(
+        operation_list, woot_state.string, woot_state.applied_ops)
       should_update |= need_to_update_input
     if should_update
       # We need to update the text content with the new value and

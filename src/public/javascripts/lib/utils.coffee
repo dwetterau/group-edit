@@ -42,8 +42,15 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
     events_ref.push
       operation: operation
       character: character
+      is_bulk: false
 
-  process_op: (operation_list, string) ->
+  send_bulk_op: (events_ref, operation, character_list) ->
+    events_ref.push
+      operation: operation
+      character_list: character_list
+      is_bulk: true
+
+  process_op: (operation_list, string, applied_ops) ->
     # If no operations to process, return
     if not operation_list.length
       return false
@@ -58,6 +65,7 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       operation_list.unshift operation_object
       return false
     else
+      this.add_applied_op applied_ops, operation_object.operation, operation_object.character
       return true
 
   is_mobile: () ->
@@ -91,17 +99,60 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
     element.keydown (event) ->
       if event.keyCode == 8
         # This is the case for backspace
-        cursor = utils.get_cursor this
-        woot_character = woot.generate_delete cursor - 1, woot_state.string
-        if woot_character
-          # We have a visible character to delete
-          woot.integrate_delete woot_state.string, woot_character
-          utils.add_applied_op(
-            woot_state.applied_ops, constants.DELETE_OPERATION, woot_character)
-          woot_state.sequence_number += 1
-          element.val woot.value(woot_state.string)
-          utils.set_cursor this, cursor - 1
+        selection = utils.get_selection_range(this)
+        if selection.text.length
+          # We need to delete all of the selected text.
+          delete_characters = []
+          for i in [selection.start..selection.end - 1]
+            delete_characters.push woot.generate_delete i, woot_state.string
+          for character in delete_characters
+            utils.execute_operation constants.DELETE_OPERATION, character, woot_state, element
+          utils.set_cursor this, selection.start
+          utils.send_bulk_op woot_state.events_ref, constants.DELETE_OPERATION, delete_characters
+        else
+          cursor = utils.get_cursor this
+          woot_character = woot.generate_delete cursor - 1, woot_state.string
+          if woot_character
+            # We have a visible character to delete
+            utils.execute_operation constants.DELETE_OPERATION, woot_character, woot_state, element
+            utils.set_cursor this, cursor - 1
 
-          utils.send_op woot_state.events_ref, constants.DELETE_OPERATION, woot_character
-          event.stopPropagation()
-          return false
+            utils.send_op woot_state.events_ref, constants.DELETE_OPERATION, woot_character
+
+        event.stopPropagation()
+        return false
+
+  execute_operation: (operation, woot_character, woot_state, element) ->
+    if operation == constants.DELETE_OPERATION
+      woot.integrate_delete woot_state.string, woot_character
+    else if operation == constants.INSERT_OPERATION
+      woot.integrate_insert woot_state.string, woot_character
+    else
+      throw Error("Unknown operation")
+    this.add_applied_op(
+      woot_state.applied_ops, operation, woot_character)
+    woot_state.sequence_number += 1
+    element.val woot.value(woot_state.string)
+
+  get_selection_range: (element) ->
+    output =
+      start: -1
+      end: -1
+    if element.createTextRange
+      range = document.selection.createRange().duplicate()
+      range.moveEnd('character', element.value.length)
+      if range.text == ''
+        output.start = element.value.length
+      else
+        output.start = element.value.lastIndexOf range.text
+
+      range = document.selection.createRange().duplicate()
+      range.moveStart('character', -element.value.length)
+      output.end = range.text.length
+    else
+      output.start = element.selectionStart
+      output.end = element.selectionEnd
+
+    output.text = element.value.substring(output.start, output.end)
+    return output
+
