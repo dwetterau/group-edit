@@ -21,7 +21,7 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       range.move 'character', index
       range.select()
     else
-      if element.selectionStart
+      if element.selectionStart?
         element.focus()
         element.setSelectionRange index, index
       else
@@ -79,7 +79,6 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
     utils = this
     element.keypress (event) ->
       k = String.fromCharCode event.which
-      # alert "Keypress: '" + k "'"
       if k
         cursor = utils.get_cursor this
         woot_character = woot.generate_insert(
