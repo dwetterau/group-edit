@@ -122,6 +122,34 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
         event.stopPropagation()
         return false
 
+  bind_paste: (element, woot_state) ->
+    utils = this
+    element.on 'paste', (event) ->
+      text = (event.originalEvent || event).clipboardData.getData('text/plain')
+      if not text.length
+        return
+      cursor_index = utils.get_cursor this
+      insert_characters = []
+      for c, index in text.split ''
+        woot_character = woot.generate_insert(
+          cursor_index + index,
+          c,
+          woot_state.participant_name,
+          woot_state.sequence_number,
+          woot_state.string
+        )
+        utils.execute_operation(
+          constants.INSERT_OPERATION, woot_character, woot_state, element
+        )
+        # We unshift here so that they get pushed on in reverse and applied
+        # in the correct order (since they are applied through pops)
+        insert_characters.unshift woot_character
+      utils.set_cursor this, cursor_index + text.length
+      utils.send_bulk_op woot_state.events_ref, constants.INSERT_OPERATION, insert_characters
+
+      event.stopPropagation()
+      return false
+
   execute_operation: (operation, woot_character, woot_state, element) ->
     if operation == constants.DELETE_OPERATION
       woot.integrate_delete woot_state.string, woot_character

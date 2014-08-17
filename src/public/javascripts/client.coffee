@@ -88,6 +88,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     console.log "is mobile"
 
   utils.bind_keydown input_element, keydown_extended, woot_state
+  utils.bind_paste input_element, woot_state
 
   apply_operations = () ->
     # Try to process all of the pending operations
