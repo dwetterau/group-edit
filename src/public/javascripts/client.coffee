@@ -93,7 +93,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   apply_operations = () ->
     # Store the cursor information before we do any operations
     element = $('#input')
-    before_cursor_state = uti ls.get_cursor_state element.get(0), woot_state.string
+    before_cursor_state = utils.get_cursor_state element.get(0), woot_state.string
     # Try to process all of the pending operations
     iterations = operation_list.length
     should_update = false

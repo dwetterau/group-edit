@@ -19,7 +19,7 @@ mkdir ./bin/routes
 
 # Compile all coffeescript to js
 echo "Compiling Coffeescript to JS..."
-./node_modules/.bin/coffee --map --output ./bin/ --compile ./src/
+./node_modules/.bin/coffee --output ./bin/ --compile ./src/
 
 echo "Linting..."
 find ./src -name "*.coffee" -print0 | xargs -0 ./node_modules/.bin/coffeelint -f ./coffeelint.json

@@ -106,10 +106,11 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
     element.keypress (event) ->
       k = String.fromCharCode event.which
       if k
+        utils.check_and_delete_selection element, this, woot_state
         cursor = utils.get_cursor this
         woot_character = woot.generate_insert(
           cursor, k, woot_state.participant_name, woot_state.sequence_number, woot_state.string)
-        utils.execute_operation constants.DELETE_OPERATION, woot_character, woot_state, element
+        utils.execute_operation constants.INSERT_OPERATION, woot_character, woot_state, element
         utils.set_cursor this, cursor + 1
 
         utils.send_op(woot_state.events_ref, constants.INSERT_OPERATION, woot_character)
@@ -119,24 +120,26 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
   bind_keydown: (element, extended, woot_state) ->
     utils = this
     element.keydown (event) ->
-      if event.keyCode == 8
-        selection_delete = utils.check_and_delete_selection this, woot_state
+      is_backspace = event.keyCode == 8
+      is_delete = event.keyCode == 46
+      if is_backspace || is_delete
+        console.log "doing a delete"
+        selection_delete = utils.check_and_delete_selection element, this, woot_state
         if selection_delete
-          return
-        # This is the case for backspace
+          return false
+        # If it's backspace, we delete the previous character, otherwise delete the next
+        cursor_adjust = if is_backspace then -1 else 0
         cursor = utils.get_cursor this
-        woot_character = woot.generate_delete cursor - 1, woot_state.string
+        woot_character = woot.generate_delete cursor + cursor_adjust, woot_state.string
         if woot_character
           # We have a visible character to delete
           utils.execute_operation constants.DELETE_OPERATION, woot_character, woot_state, element
-          utils.set_cursor this, cursor - 1
+          utils.set_cursor this, cursor + cursor_adjust
 
           utils.send_op woot_state.events_ref, constants.DELETE_OPERATION, woot_character
 
         event.stopPropagation()
         return false
-      else
-        console.log event.keyCode
 
   bind_paste: (element, woot_state) ->
     utils = this
@@ -166,17 +169,17 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       event.stopPropagation()
       return false
 
-  check_and_delete_selection: (element, woot_state) ->
-    selection = utils.get_selection_range element
-    if selection.text.length
+  check_and_delete_selection: (element, dom, woot_state) ->
+    selection = this.get_selection_range dom
+    if selection.text.length > 0
       # We need to delete all of the selected text.
       delete_characters = []
       for i in [selection.start..selection.end - 1]
         delete_characters.push woot.generate_delete i, woot_state.string
       for character in delete_characters
-        utils.execute_operation constants.DELETE_OPERATION, character, woot_state, element
-      utils.set_cursor element, selection.start
-      utils.send_bulk_op woot_state.events_ref, constants.DELETE_OPERATION, delete_characters
+        this.execute_operation constants.DELETE_OPERATION, character, woot_state, element
+      this.set_cursor dom, selection.start
+      this.send_bulk_op woot_state.events_ref, constants.DELETE_OPERATION, delete_characters
       return true
     return false
 
