@@ -70,6 +70,17 @@ define ['lib/constants'], (constants) ->
         return character
     return null
 
+  string_index_to_ith: (string, string_index) ->
+    index_seen = -1
+    string_index_seen = -1
+    for character in string
+      string_index_seen += 1
+      if character.visible
+        index_seen += 1
+      if string_index == string_index_seen
+        return index_seen
+    return index_seen
+
   generate_insert: (index, visible_string, participant_name, sequence_number, string) ->
     before_character = this.ith_visible(string, index - 1)
     after_character = this.ith_visible(string, index)
@@ -120,9 +131,11 @@ define ['lib/constants'], (constants) ->
     this.set_visible string, index, false
 
   integrate_insert: (string, character) ->
-    this.integrate_insert_helper string, character, character.before_id, character.after_id
+    insert_position = this.determine_insert_position(
+      string, character, character.before_id, character.after_id)
+    this.insert string, character, insert_position
 
-  integrate_insert_helper: (string, character, before_id, after_id) ->
+  determine_insert_position: (string, character, before_id, after_id) ->
     # Get the before and after character indices
     before_index = this.get_position string, before_id
     after_index = this.get_position string, after_id
@@ -132,7 +145,7 @@ define ['lib/constants'], (constants) ->
 
     sub_sequence = this.sub_sequence(string, before_index, after_index)
     if sub_sequence.length == 0
-      this.insert string, character, after_index
+      return after_index
     else
       # Add on the before and after indices again
       sub_sequence.unshift before_id
@@ -140,4 +153,4 @@ define ['lib/constants'], (constants) ->
       i = 1
       while i < sub_sequence.length - 1 and this.compare_id(sub_sequence[i], character.id) < 0
         i += 1
-      this.integrate_insert_helper string, character, sub_sequence[i - 1], sub_sequence[i]
+      this.determine_insert_position string, character, sub_sequence[i - 1], sub_sequence[i]

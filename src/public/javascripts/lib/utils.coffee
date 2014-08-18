@@ -27,6 +27,32 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       else
         element.focus()
 
+  get_cursor_state: (element, string) ->
+    cursor_index = this.get_cursor element
+    after_cursor_character = woot.ith_visible string, cursor_index - 1
+    before_cursor_character = woot.ith_visible string, cursor_index
+    if not after_cursor_character
+      after_cursor_character = string[0]
+    if not before_cursor_character
+      before_cursor_character = string[string.length - 1]
+    cursor_state =
+      character:
+        id:
+          name: ''
+          number: 2 # This is 2 because begin and end character are 0 and 1
+        visible: false
+        value: ''
+      before_id: before_cursor_character.id
+      after_id: after_cursor_character.id
+
+    return cursor_state
+
+  set_cursor_state: (element, string, cursor_state) ->
+    string_index = woot.determine_insert_position(
+      string, cursor_state.character, cursor_state.before_id, cursor_state.after_id)
+    new_index = woot.string_index_to_ith string, string_index
+    this.set_cursor element, new_index + 1
+
   get_op_key: (operation, character) ->
     return [operation, character.id.name, character.id.number].join('|')
 

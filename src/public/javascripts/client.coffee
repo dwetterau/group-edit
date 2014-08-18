@@ -91,6 +91,9 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   utils.bind_paste input_element, woot_state
 
   apply_operations = () ->
+    # Store the cursor information before we do any operations
+    element = $('#input')
+    before_cursor_state = uti ls.get_cursor_state element.get(0), woot_state.string
     # Try to process all of the pending operations
     iterations = operation_list.length
     should_update = false
@@ -102,13 +105,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     if should_update
       # We need to update the text content with the new value and
       # move the cursor back to where it was...
-      element = $('#input')
-      before_cursor = utils.get_cursor element.get(0)
       element.val woot.value woot_state.string
-      # TODO(david): Eliminate cursor creep, you losing your spot because someone else typed
-      # something earlier in the string than where you were. Basically we need to figure out
-      # when to move the cursor one over or when to leave it where it is...
-      # idea!: leverage WOOT to store the cursor position also.
-      utils.set_cursor element.get(0), before_cursor
+      utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
 
-  setInterval apply_operations, 100
+  setInterval apply_operations, 10000
