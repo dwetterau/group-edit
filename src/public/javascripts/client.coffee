@@ -23,6 +23,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
   operation_list = []
   pending_operation_list = []
   initialized = false
+  old_value = ''
 
   # On page load, load the list of all operations, perform them once.
   woot_state.events_ref.once 'value', (data) ->
@@ -33,7 +34,8 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       utils.process_op operation_list, woot_state.string, woot_state.applied_ops
     element = $('#input')
     string_representation = woot.value woot_state.string
-    element.text string_representation
+    element.val string_representation
+    old_value = string_representation
     utils.set_cursor(element.get(0), string_representation.length)
 
     # We have to start putting new operations in the real list before we move
@@ -79,27 +81,13 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
 
   dmp = new diff_match_patch()
 
-  old_value = ''
-  initial_summary = true
-  summary_callback = (summaries) ->
-    if initial_summary
-      # Don't do anything when we set the inital value
-      initial_summary = false
-      old_value = $('#input')[0].textContent
-      return
+  onchange_callback = (event) ->
     before = old_value
-    after = $('#input')[0].textContent
+    after = $('#input').val()
     utils.process_diff dmp.diff_main(before, after), woot_state
-
     old_value = after
 
-  observer = new MutationSummary(
-    callback: summary_callback
-    rootNode: $('#input')[0]
-    queries: [
-      characterData: true
-    ]
-  )
+  $('#input').bind 'input propertychange', onchange_callback
 
   apply_operations = () ->
     # Store the cursor information before we do any operations
@@ -119,7 +107,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       new_value = woot.value woot_state.string
       # Update our old_value first so we don't fire off new diffs
       old_value = new_value
-      element.text new_value
+      element.val new_value
       utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
 
   setInterval apply_operations, 100
