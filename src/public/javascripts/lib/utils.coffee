@@ -121,7 +121,6 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
     this.send_bulk_op woot_state.events_ref, constants.DELETE_OPERATION, delete_characters
 
   process_diff: (diff_array, woot_state) ->
-    console.log diff_array
     index = 0
     for diff_subarray in diff_array
       type = diff_subarray[0]

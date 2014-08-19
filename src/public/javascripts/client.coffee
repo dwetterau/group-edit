@@ -79,13 +79,19 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
 
   dmp = new diff_match_patch()
 
+  old_value = ''
+  initial_summary = true
   summary_callback = (summaries) ->
-    summary = summaries[0]
-    for node in summary.valueChanged
-      before = summary.getOldCharacterData(node)
-      after = $('#input')[0].textContent
-      console.log "diffing", before, after
-      utils.process_diff dmp.diff_main(before, after), woot_state
+    if initial_summary
+      # Don't do anything when we set the inital value
+      initial_summary = false
+      old_value = $('#input')[0].textContent
+      return
+    before = old_value
+    after = $('#input')[0].textContent
+    utils.process_diff dmp.diff_main(before, after), woot_state
+
+    old_value = after
 
   observer = new MutationSummary(
     callback: summary_callback
@@ -110,7 +116,10 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     if should_update
       # We need to update the text content with the new value and
       # move the cursor back to where it was...
-      element.text woot.value woot_state.string
+      new_value = woot.value woot_state.string
+      # Update our old_value first so we don't fire off new diffs
+      old_value = new_value
+      element.text new_value
       utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
 
   setInterval apply_operations, 100
