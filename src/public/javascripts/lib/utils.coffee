@@ -71,6 +71,7 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       is_bulk: false
 
   send_bulk_op: (events_ref, operation, character_list) ->
+    console.log 'sending bulk op!', character_list
     events_ref.push
       operation: operation
       character_list: character_list
@@ -94,96 +95,44 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       this.add_applied_op applied_ops, operation_object.operation, operation_object.character
       return true
 
-  is_mobile: () ->
-    try
-      document.createEvent "TouchEvent"
-      return true
-    catch e
-      return false
+  process_bulk_insert: (text, start_index, woot_state) ->
+    insert_characters = []
+    for c, index in text.split ''
+      woot_character = woot.generate_insert(
+        start_index + index,
+        c,
+        woot_state.participant_name,
+        woot_state.sequence_number,
+        woot_state.string
+      )
+      this.execute_operation(
+        constants.INSERT_OPERATION, woot_character, woot_state
+      )
+      # We unshift here so that they get pushed on in reverse and applied
+      # in the correct order (since they are applied through pops)
+      insert_characters.unshift woot_character
+    this.send_bulk_op woot_state.events_ref, constants.INSERT_OPERATION, insert_characters
 
-  bind_keypress: (element, woot_state) ->
-    utils = this
-    element.keypress (event) ->
-      k = String.fromCharCode event.which
-      if k
-        utils.check_and_delete_selection element, this, woot_state
-        cursor = utils.get_cursor this
-        woot_character = woot.generate_insert(
-          cursor, k, woot_state.participant_name, woot_state.sequence_number, woot_state.string)
-        utils.execute_operation constants.INSERT_OPERATION, woot_character, woot_state, element
-        utils.set_cursor this, cursor + 1
+  process_bulk_delete: (text, start_index, woot_state) ->
+    delete_characters = []
+    for c, index in text.split ''
+      delete_characters.push woot.generate_delete start_index + index, woot_state.string
+    for character in delete_characters
+      this.execute_operation constants.DELETE_OPERATION, character, woot_state
+    this.send_bulk_op woot_state.events_ref, constants.DELETE_OPERATION, delete_characters
 
-        utils.send_op(woot_state.events_ref, constants.INSERT_OPERATION, woot_character)
-        event.stopPropagation()
-        return false
+  process_diff: (diff_array, woot_state) ->
+    index = 0
+    for diff_subarray in diff_array
+      type = diff_subarray[0]
+      text = diff_subarray[1]
+      if type == 1
+        this.process_bulk_insert text, index, woot_state
+      else if type == -1
+        this.process_bulk_delete text, index, woot_state
+      index += text.length
 
-  bind_keydown: (element, extended, woot_state) ->
-    utils = this
-    element.keydown (event) ->
-      is_backspace = event.keyCode == 8
-      is_delete = event.keyCode == 46
-      if is_backspace || is_delete
-        console.log "doing a delete"
-        selection_delete = utils.check_and_delete_selection element, this, woot_state
-        if selection_delete
-          return false
-        # If it's backspace, we delete the previous character, otherwise delete the next
-        cursor_adjust = if is_backspace then -1 else 0
-        cursor = utils.get_cursor this
-        woot_character = woot.generate_delete cursor + cursor_adjust, woot_state.string
-        if woot_character
-          # We have a visible character to delete
-          utils.execute_operation constants.DELETE_OPERATION, woot_character, woot_state, element
-          utils.set_cursor this, cursor + cursor_adjust
-
-          utils.send_op woot_state.events_ref, constants.DELETE_OPERATION, woot_character
-
-        event.stopPropagation()
-        return false
-
-  bind_paste: (element, woot_state) ->
-    utils = this
-    element.on 'paste', (event) ->
-      text = (event.originalEvent || event).clipboardData.getData('text/plain')
-      if not text.length
-        return
-      cursor_index = utils.get_cursor this
-      insert_characters = []
-      for c, index in text.split ''
-        woot_character = woot.generate_insert(
-          cursor_index + index,
-          c,
-          woot_state.participant_name,
-          woot_state.sequence_number,
-          woot_state.string
-        )
-        utils.execute_operation(
-          constants.INSERT_OPERATION, woot_character, woot_state, element
-        )
-        # We unshift here so that they get pushed on in reverse and applied
-        # in the correct order (since they are applied through pops)
-        insert_characters.unshift woot_character
-      utils.set_cursor this, cursor_index + text.length
-      utils.send_bulk_op woot_state.events_ref, constants.INSERT_OPERATION, insert_characters
-
-      event.stopPropagation()
-      return false
-
-  check_and_delete_selection: (element, dom, woot_state) ->
-    selection = this.get_selection_range dom
-    if selection.text.length > 0
-      # We need to delete all of the selected text.
-      delete_characters = []
-      for i in [selection.start..selection.end - 1]
-        delete_characters.push woot.generate_delete i, woot_state.string
-      for character in delete_characters
-        this.execute_operation constants.DELETE_OPERATION, character, woot_state, element
-      this.set_cursor dom, selection.start
-      this.send_bulk_op woot_state.events_ref, constants.DELETE_OPERATION, delete_characters
-      return true
-    return false
-
-  execute_operation: (operation, woot_character, woot_state, element) ->
+  execute_operation: (operation, woot_character, woot_state) ->
     if operation == constants.DELETE_OPERATION
       woot.integrate_delete woot_state.string, woot_character
     else if operation == constants.INSERT_OPERATION
@@ -193,27 +142,4 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
     this.add_applied_op(
       woot_state.applied_ops, operation, woot_character)
     woot_state.sequence_number += 1
-    element.val woot.value(woot_state.string)
-
-  get_selection_range: (element) ->
-    output =
-      start: -1
-      end: -1
-    if element.createTextRange
-      range = document.selection.createRange().duplicate()
-      range.moveEnd('character', element.value.length)
-      if range.text == ''
-        output.start = element.value.length
-      else
-        output.start = element.value.lastIndexOf range.text
-
-      range = document.selection.createRange().duplicate()
-      range.moveStart('character', -element.value.length)
-      output.end = range.text.length
-    else
-      output.start = element.selectionStart
-      output.end = element.selectionEnd
-
-    output.text = element.value.substring(output.start, output.end)
-    return output
 

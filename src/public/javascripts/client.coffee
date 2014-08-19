@@ -33,7 +33,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
       utils.process_op operation_list, woot_state.string, woot_state.applied_ops
     element = $('#input')
     string_representation = woot.value woot_state.string
-    element.val string_representation
+    element.text string_representation
     utils.set_cursor(element.get(0), string_representation.length)
 
     # We have to start putting new operations in the real list before we move
@@ -54,11 +54,11 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     if utils.check_applied_op woot_state.applied_ops, operation, character
       return
 
-    # TODO(david): Investigate if it's faster to unshift or push here
     list.push operation_object
 
   unpack_and_push_operation = (operation_object, list) ->
     if operation_object.is_bulk
+      console.log "unpacking bulk operation!"
       # Unpack the operation object into many operations
       for character in operation_object.character_list
         new_operation_object =
@@ -78,17 +78,21 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     else
       unpack_and_push_operation operation_object, pending_operation_list
 
-  input_element = $('#input')
-  keydown_extended = true
-  if not utils.is_mobile()
-    console.log "not mobile"
-    utils.bind_keypress input_element, woot_state
-    keydown_extended = false
-  else
-    console.log "is mobile"
+  dmp = new diff_match_patch()
 
-  utils.bind_keydown input_element, keydown_extended, woot_state
-  utils.bind_paste input_element, woot_state
+  observer = new MutationObserver (mutations) ->
+    mutation = mutations[0]
+    if not mutation.type == 'characterData'
+      return
+    console.log mutation
+    before = mutation.oldValue
+    after = mutation.target.data
+    utils.process_diff dmp.diff_main(before, after), woot_state
+
+  observer.observe $('#input')[0],
+    subtree: true
+    characterData: true
+    characterDataOldValue: true
 
   apply_operations = () ->
     # Store the cursor information before we do any operations
@@ -105,7 +109,7 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     if should_update
       # We need to update the text content with the new value and
       # move the cursor back to where it was...
-      element.val woot.value woot_state.string
+      element.text woot.value woot_state.string
       utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
 
-  setInterval apply_operations, 10000
+  setInterval apply_operations, 100
