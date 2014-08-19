@@ -6,10 +6,19 @@
 </head>
 <body>
     <div id="header">
-        <h1>Real-time collaboration anywhere (except on mobile android  :( ).</h1>
+        <h1>Real-time collaboration in a textarea.</h1>
     </div>
     <div id="input_div">
-        <textarea id="input"></textarea>
+        <textarea placeholder="Type here..." id="input"></textarea>
+    </div>
+    <div id="info">
+        <p>This uses <a href="https://www.firebase.com/">Firebase</a> and an intention preserving conflict avoidance strategy
+        based on <a href="http://hal.inria.fr/docs/00/07/12/40/PDF/RR-5580.pdf">this research</a>
+        to provide a real-time collaboration experience in a textarea element.</p>
+
+        <p>It relies on efficient diffs on the text content to produce necessary updates to propagate to other viewers.
+        Offline updates are always able to be applied. Writes by competing viewers will not be interleaved and the
+        algorithm tries to preserve the cursor position that makes sense for each viewer.</p>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="https://cdn.firebase.com/js/client/1.0.18/firebase.js"></script>
