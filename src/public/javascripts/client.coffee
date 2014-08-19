@@ -58,7 +58,6 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
 
   unpack_and_push_operation = (operation_object, list) ->
     if operation_object.is_bulk
-      console.log "unpacking bulk operation!"
       # Unpack the operation object into many operations
       for character in operation_object.character_list
         new_operation_object =
@@ -80,19 +79,21 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
 
   dmp = new diff_match_patch()
 
-  observer = new MutationObserver (mutations) ->
-    mutation = mutations[0]
-    if not mutation.type == 'characterData'
-      return
-    console.log mutation
-    before = mutation.oldValue
-    after = mutation.target.data
-    utils.process_diff dmp.diff_main(before, after), woot_state
+  summary_callback = (summaries) ->
+    summary = summaries[0]
+    for node in summary.valueChanged
+      before = summary.getOldCharacterData(node)
+      after = $('#input')[0].textContent
+      console.log "diffing", before, after
+      utils.process_diff dmp.diff_main(before, after), woot_state
 
-  observer.observe $('#input')[0],
-    subtree: true
-    characterData: true
-    characterDataOldValue: true
+  observer = new MutationSummary(
+    callback: summary_callback
+    rootNode: $('#input')[0]
+    queries: [
+      characterData: true
+    ]
+  )
 
   apply_operations = () ->
     # Store the cursor information before we do any operations

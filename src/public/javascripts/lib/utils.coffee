@@ -71,7 +71,6 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       is_bulk: false
 
   send_bulk_op: (events_ref, operation, character_list) ->
-    console.log 'sending bulk op!', character_list
     events_ref.push
       operation: operation
       character_list: character_list
@@ -122,6 +121,7 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
     this.send_bulk_op woot_state.events_ref, constants.DELETE_OPERATION, delete_characters
 
   process_diff: (diff_array, woot_state) ->
+    console.log diff_array
     index = 0
     for diff_subarray in diff_array
       type = diff_subarray[0]
@@ -130,6 +130,7 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
         this.process_bulk_insert text, index, woot_state
       else if type == -1
         this.process_bulk_delete text, index, woot_state
+        index -= text.length
       index += text.length
 
   execute_operation: (operation, woot_character, woot_state) ->
