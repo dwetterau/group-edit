@@ -143,3 +143,5 @@ define ['lib/constants', 'lib/woot'], (constants, woot) ->
       woot_state.applied_ops, operation, woot_character)
     woot_state.sequence_number += 1
 
+  render_output: (element, string_value) ->
+    element.html string_value.html

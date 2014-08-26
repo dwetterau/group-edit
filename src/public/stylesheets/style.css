@@ -12,6 +12,19 @@ div#input_div {
     box-shadow: 5px 5px 5px #888888;
 }
 
+div.row {
+    display: inline-block;
+}
+
+div#output {
+    border: thin solid #888;
+}
+
+span.cursor {
+    min-width: .5em;
+    color: #F00;
+}
+
 textarea#input {
     width: 100%;
     height: 100%;

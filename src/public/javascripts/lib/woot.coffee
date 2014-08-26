@@ -53,13 +53,25 @@ define ['lib/constants'], (constants) ->
     # TODO(david): Make this a fast lookup
     return this.get_position(string, target_id) != -1
 
-  value: (string) ->
+  value: (string, cursor_index) ->
+    # Note that if cursor_index = -1, set it to the default (at the end of the string)
     visible_string = ''
+    html_string = ''
+    cursor_string = '<span class="cursor"></span>'
     for character in string
       if character.visible
         visible_string += character.value
+        html_string += character.value
+        if visible_string.length - 1 == cursor_index
+          html_string += cursor_string
 
-    return visible_string
+    if cursor_index == -1
+      html_string += cursor_string
+    value_object =
+      text: visible_string
+      html: html_string
+
+    return value_object
 
   ith_visible: (string, index) ->
     index_seen = -1

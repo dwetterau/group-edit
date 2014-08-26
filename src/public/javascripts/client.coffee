@@ -33,10 +33,11 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     while operation_list.length > 0
       utils.process_op operation_list, woot_state.string, woot_state.applied_ops
     element = $('#input')
-    string_representation = woot.value woot_state.string
-    element.val string_representation
-    old_value = string_representation
-    utils.set_cursor(element.get(0), string_representation.length)
+    string_value = woot.value woot_state.string, -1
+    element.val string_value.text
+    utils.render_output $('#output'), string_value
+    old_value = string_value.text
+    utils.set_cursor(element.get(0), string_value.text.length)
 
     # We have to start putting new operations in the real list before we move
     # the pending ones over.
@@ -85,6 +86,8 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     before = old_value
     after = $('#input').val()
     utils.process_diff dmp.diff_main(before, after), woot_state
+    string_value = woot.value woot_state.string, utils.get_cursor this
+    utils.render_output $('#output'), string_value
     old_value = after
 
   $('#input').bind 'input propertychange', onchange_callback
@@ -104,10 +107,16 @@ require ['lib/constants', 'lib/woot', 'lib/utils'], (constants, woot, utils) ->
     if should_update
       # We need to update the text content with the new value and
       # move the cursor back to where it was...
-      new_value = woot.value woot_state.string
+      string_cursor_index = woot.determine_insert_position(
+        woot_state.string,
+        before_cursor_state.character,
+        before_cursor_state.before_id,
+        before_cursor_state.after_id
+      )
+      string_value = woot.value woot_state.string, string_cursor_index
       # Update our old_value first so we don't fire off new diffs
-      old_value = new_value
-      element.val new_value
-      utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
+      old_value = string_value.text
+      element.val string_value.text
+      utils.set_cursor_state element.get(0), woot_state.string, undefined, string_cursor_index
 
   setInterval apply_operations, 100
