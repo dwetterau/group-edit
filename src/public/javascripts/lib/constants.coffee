@@ -1,4 +1,4 @@
-define
+module.exports =
   FIREBASE_NAME: 'grouped'
   FIREBASE: 'https://grouped.firebaseio.com/'
   TEST_CHILD: 'TEST_CHILD'

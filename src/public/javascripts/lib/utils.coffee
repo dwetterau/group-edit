@@ -1,4 +1,7 @@
-define ['lib/constants', 'lib/woot'], (constants, woot) ->
+woot = require './woot.coffee'
+constants = require './constants.coffee'
+
+module.exports =
   get_cursor: (element) ->
     if element.selectionStart
       return element.selectionStart

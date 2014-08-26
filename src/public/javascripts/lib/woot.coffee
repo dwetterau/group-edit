@@ -1,4 +1,6 @@
-define ['lib/constants'], (constants) ->
+constants = require './constants.coffee'
+
+module.exports =
   initialize_string: () ->
     begin_character =
       id:
