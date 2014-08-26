@@ -10,4 +10,4 @@ class Character
     return $(@html)
 
 module.exports =
-  Charcter: Character
+  Character: Character
