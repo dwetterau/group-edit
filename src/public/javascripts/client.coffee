@@ -87,16 +87,17 @@ woot_state.events_ref.on 'child_added', (snapshot, previous_child) ->
 string_to_character = (string) ->
   character_list = []
   for i in [0...string.length]
-    character_list.push new Character(string.charAt(i), string.charAt(i))
+    character_list.push(new Character(string.charAt(i), string.charAt(i)))
 
   return character_list
 
 onchange_callback = (event) ->
   before = string_to_character old_value
-  after = string_to_character $('#input').val()
+  after_text = $('#input').val()
+  after = string_to_character after_text
 
   utils.process_diff diff.diff(before, after), woot_state
-  old_value = after
+  old_value = after_text
 
 $('#input').bind 'input propertychange', onchange_callback
 

@@ -97,12 +97,12 @@ module.exports =
       this.add_applied_op applied_ops, operation_object.operation, operation_object.character
       return true
 
-  process_bulk_insert: (text, start_index, woot_state) ->
+  process_bulk_insert: (character_list, start_index, woot_state) ->
     insert_characters = []
-    for c, index in text.split ''
+    for c, index in character_list
       woot_character = woot.generate_insert(
         start_index + index,
-        c,
+        c.html,
         woot_state.participant_name,
         woot_state.sequence_number,
         woot_state.string
@@ -115,9 +115,9 @@ module.exports =
       insert_characters.unshift woot_character
     this.send_bulk_op woot_state.events_ref, constants.INSERT_OPERATION, insert_characters
 
-  process_bulk_delete: (text, start_index, woot_state) ->
+  process_bulk_delete: (character_list, start_index, woot_state) ->
     delete_characters = []
-    for c, index in text.split ''
+    for character, index in character_list
       delete_characters.push woot.generate_delete start_index + index, woot_state.string
     for character in delete_characters
       this.execute_operation constants.DELETE_OPERATION, character, woot_state
@@ -127,13 +127,13 @@ module.exports =
     index = 0
     for diff_subarray in diff_array
       type = diff_subarray[0]
-      text = diff_subarray[1]
+      character_list = diff_subarray[1]
       if type == 1
-        this.process_bulk_insert text, index, woot_state
+        this.process_bulk_insert character_list, index, woot_state
       else if type == -1
-        this.process_bulk_delete text, index, woot_state
-        index -= text.length
-      index += text.length
+        this.process_bulk_delete character_list, index, woot_state
+        index -= character_list.length
+      index += character_list.length
 
   execute_operation: (operation, woot_character, woot_state) ->
     if operation == constants.DELETE_OPERATION
