@@ -66,7 +66,25 @@ module.exports =
 
     return operation_list
 
+  _compress: (operation_list) ->
+    if not operation_list.length
+      return []
+    compressed = []
+    current_operation = undefined
+    for operation in operation_list
+      if not current_operation?
+        current_operation = [operation[0], [operation[1]]]
+      else if operation[0] == current_operation[0]
+        current_operation[1].push operation[1]
+      else
+        compressed.push current_operation
+        current_operation = [operation[0], [operation[1]]]
+
+    compressed.push current_operation
+    return compressed
+
   diff: (ms_start, ms_end) ->
     # Takes in two meta_strings and diffs them
     matrix = @_lcs ms_start, ms_end
-    return @_backtrack matrix
+    operation_list = @_backtrack matrix
+    return @_compress(operation_list)

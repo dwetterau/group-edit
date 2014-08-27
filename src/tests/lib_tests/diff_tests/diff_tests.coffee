@@ -75,14 +75,16 @@ describe 'diff_tests', () ->
         for c in [0...matrix[r].length]
           assert.equal matrix[r][c].value, expected[r][c]
 
-  describe 'test_diff', () ->
+  describe 'test_backtrack', () ->
     it 'should return no operations for empty start and end', () ->
       operations = diff.diff [], []
       assert.equal operations.length, 0
 
     it 'should return all inserts for empty start and valid end', () ->
       end = string_ab
-      operations = diff.diff [], end
+
+      matrix = diff._lcs [], end
+      operations = diff._backtrack matrix
       assert.equal operations.length, end.length
 
       for operation, index in operations
@@ -97,7 +99,8 @@ describe 'diff_tests', () ->
     it 'should return all deletes for valid start and empty end', () ->
       start = string_ab
 
-      operations = diff.diff start, []
+      matrix = diff._lcs start, []
+      operations = diff._backtrack matrix
       assert.equal operations.length, start.length
 
       for operation, index in operations
@@ -113,7 +116,8 @@ describe 'diff_tests', () ->
       start = string_ab
       end = string_ab
 
-      operations = diff.diff start, end
+      matrix = diff._lcs start, end
+      operations = diff._backtrack matrix
       assert.equal operations.length, start.length
 
       for operation, index in operations
@@ -130,7 +134,8 @@ describe 'diff_tests', () ->
       start = string_ab
       end = string_abc
 
-      operations = diff.diff start, end
+      matrix = diff._lcs start, end
+      operations = diff._backtrack matrix
       assert.equal operations.length, end.length
 
       expected =
@@ -147,7 +152,8 @@ describe 'diff_tests', () ->
       start = string_ab
       end = string_ba
 
-      operations = diff.diff start, end
+      matrix = diff._lcs start, end
+      operations = diff._backtrack matrix
       assert.equal operations.length, end.length + 1
 
       expected =
@@ -160,3 +166,32 @@ describe 'diff_tests', () ->
         # Make sure the op type and characters match
         assert.equal operation[0], expected.ops[index]
         assert operation[1].equals(expected.chars[index])
+
+  describe 'test_compress', () ->
+    it 'should return empty on empty', () ->
+      operations = diff._compress []
+      assert.equal operations.length, 0
+
+    it 'should return the input if not compressible', () ->
+      operations = [[1, 'a'], [0, 'b']]
+      compressed = diff._compress operations
+
+      assert.equal compressed.length, operations.length
+      for operation, index in compressed
+        assert.equal operation[0], operations[index][0]
+        assert.equal operation[1][0], operations[index][1]
+
+    it 'should compress consecutive operations', () ->
+      operations = [[1, 'a'], [0, 'b'], [0, 'c']]
+      compressed = diff._compress operations
+
+      expected = [
+        [1, ['a']]
+        [0, ['b', 'c']]
+      ]
+      assert.equal compressed.length, expected.length
+      for operation, index in compressed
+        assert.equal operation[0], expected[index][0]
+        assert.equal operation[1].length, expected[index][1].length
+        for character, character_index in operation[1]
+          assert.equal character, expected[index][1][character_index]
