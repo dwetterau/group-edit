@@ -2,7 +2,7 @@ class Element
   constructor: (@index, @value, @operation, @previous_index) ->
 
   get_previous: (matrix) ->
-    if index.row == 0 and index.column == 0
+    if @index.row == 0 and @index.column == 0
       return undefined
 
     return matrix[@previous_index.row][@previous_index.column]
@@ -20,7 +20,7 @@ module.exports =
       for c in [0...ms_end.length + 1]
         undefined
 
-    matrix[0][0] = new Element({row: 0, column: 0}, 0)
+    matrix[0][0] = new Element(@_index(0, 0), 0, undefined, undefined)
 
     # fill in the top row, each element to the right is an insert
     for c in [1...ms_end.length + 1]
@@ -28,26 +28,28 @@ module.exports =
 
     # fill in the down row, each element below is a deletion
     for r in [1...ms_start.length + 1]
-      matrix[r][0] = new Element(@_index(r, 0), 0, [-1, ms_start[r - 1]], @_index(0, r - 1))
+      matrix[r][0] = new Element(@_index(r, 0), 0, [-1, ms_start[r - 1]], @_index(r - 1, 0))
 
     for r in [1...ms_start.length + 1]
       for c in [1...ms_end.length + 1]
         current = @_index(r, c)
-        if ms_start[r].equals(ms_end[c])
+        s_i = r - 1
+        e_i = c - 1
+        if ms_start[s_i].equals(ms_end[e_i])
           # Yay the characters matched, insert a "0" operation here
           value = matrix[r - 1][c - 1].value + 1
           previous = @_index(r - 1, c - 1)
-          operation = [0, ms_end[c]]
+          operation = [0, ms_end[e_i]]
         else if matrix[r][c - 1].value > matrix[r - 1][c].value
           # In this case, the element to our left is bigger, so we want to do an insert
           value = matrix[r][c - 1].value
           previous = @_index(r, c - 1)
-          operation = [1, ms_end[c]]
+          operation = [1, ms_end[e_i]]
         else
           # In this case the element above is bigger or the same, do a delete
           value = matrix[r - 1][c].value
           previous = @_index(r - 1, c)
-          operation = [-1, ms_start[r]]
+          operation = [-1, ms_start[s_i]]
         matrix[r][c] = new Element(current, value, operation, previous)
 
     return matrix
