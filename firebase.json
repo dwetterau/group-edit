@@ -1,5 +1,5 @@
 {
-    "firebase": "group-edit",
+    "firebase": "grouped",
     "public": "./bin/public",
     "ignore": [
         "firebase.json",

@@ -1,6 +1,8 @@
 constants = require './lib/constants.coffee'
 woot = require './lib/woot.coffee'
 utils = require './lib/utils.coffee'
+Character = require('./lib/meta_string/character.coffee').Character
+diff = require('./lib/diff/diff.coffee')
 
 firebase = new Firebase(constants.FIREBASE)
 
@@ -82,12 +84,18 @@ woot_state.events_ref.on 'child_added', (snapshot, previous_child) ->
   else
     unpack_and_push_operation operation_object, pending_operation_list
 
-dmp = new diff_match_patch()
+string_to_character = (string) ->
+  character_list = []
+  for i in [0...string.length]
+    character_list.push new Character(string.charAt(i), string.charAt(i))
+
+  return character_list
 
 onchange_callback = (event) ->
-  before = old_value
-  after = $('#input').val()
-  utils.process_diff dmp.diff_main(before, after), woot_state
+  before = string_to_character old_value
+  after = string_to_character $('#input').val()
+
+  utils.process_diff diff.diff(before, after), woot_state
   old_value = after
 
 $('#input').bind 'input propertychange', onchange_callback
