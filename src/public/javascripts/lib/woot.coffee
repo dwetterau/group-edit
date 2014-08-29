@@ -1,4 +1,5 @@
 constants = require './constants.coffee'
+Character = require('./meta_string/character.coffee').Character
 
 module.exports =
   initialize_string: () ->
@@ -7,13 +8,13 @@ module.exports =
         name: ''
         number: 0
       visible: false
-      value: ''
+      value: new Character()
     end_character =
       id:
         name: ''
         number: 1
       visible: false
-      value: ''
+      value: new Character()
     return [begin_character, end_character]
 
   length: (string) ->
@@ -56,10 +57,10 @@ module.exports =
     return this.get_position(string, target_id) != -1
 
   value: (string) ->
-    visible_string = ''
+    visible_string = []
     for character in string
       if character.visible
-        visible_string += character.value
+        visible_string.push character.value
 
     return visible_string
 
@@ -83,7 +84,7 @@ module.exports =
         return index_seen
     return index_seen
 
-  generate_insert: (index, visible_string, participant_name, sequence_number, string) ->
+  generate_insert: (index, string_character, participant_name, sequence_number, string) ->
     before_character = this.ith_visible(string, index - 1)
     after_character = this.ith_visible(string, index)
     if not before_character
@@ -95,7 +96,7 @@ module.exports =
         number: sequence_number
         name: participant_name
       visible: true
-      value: visible_string
+      value: string_character
       before_id: before_character.id
       after_id: after_character.id
 

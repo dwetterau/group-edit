@@ -38,7 +38,7 @@ woot_state.events_ref.once 'value', (data) ->
   while operation_list.length > 0
     utils.process_op operation_list, woot_state.string, woot_state.applied_ops
   element = $('#input')
-  string_representation = woot.value woot_state.string
+  string_representation = utils.character_list_to_string woot.value woot_state.string
   element.val string_representation
   old_value = string_representation
   utils.set_cursor(element.get(0), string_representation.length)
@@ -116,7 +116,7 @@ apply_operations = () ->
   if should_update
     # We need to update the text content with the new value and
     # move the cursor back to where it was...
-    new_value = woot.value woot_state.string
+    new_value = utils.character_list_to_string woot.value woot_state.string
     # Update our old_value first so we don't fire off new diffs
     old_value = new_value
     element.val new_value

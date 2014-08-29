@@ -102,7 +102,7 @@ module.exports =
     for c, index in character_list
       woot_character = woot.generate_insert(
         start_index + index,
-        c.html,
+        c,
         woot_state.participant_name,
         woot_state.sequence_number,
         woot_state.string
@@ -146,3 +146,9 @@ module.exports =
       woot_state.applied_ops, operation, woot_character)
     woot_state.sequence_number += 1
 
+  character_list_to_string: (character_list) ->
+    visible_string = ''
+    for character in character_list
+      visible_string += character.html
+
+    return visible_string
