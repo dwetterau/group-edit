@@ -7,3 +7,9 @@ module.exports =
 
   INSERT_OPERATION: 'insert'
   DELETE_OPERATION: 'delete'
+
+  # DOM constants
+  DOM_TAGS:
+    div: '<div>'
+    br: '<br>'
+    p: '<p>'

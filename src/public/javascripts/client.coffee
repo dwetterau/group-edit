@@ -84,13 +84,6 @@ woot_state.events_ref.on 'child_added', (snapshot, previous_child) ->
   else
     unpack_and_push_operation operation_object, pending_operation_list
 
-string_to_character = (string) ->
-  character_list = []
-  for i in [0...string.length]
-    character_list.push(new Character(string.charAt(i), string.charAt(i)))
-
-  return character_list
-
 onchange_callback = (event) ->
   before = string_to_character old_value
   after_text = $('#input').val()
