@@ -1,5 +1,5 @@
 assert = require('assert')
-Character = require('../../../public/javascripts/lib/meta_string/character').Character
+{Character} = require('../../../public/javascripts/lib/meta_string/character.coffee')
 
 describe 'character_tests', () ->
 

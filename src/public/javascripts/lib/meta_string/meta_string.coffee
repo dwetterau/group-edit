@@ -1,9 +1,8 @@
 $ = require('jquery')
 constants = require('../constants.coffee')
+{Character} = require('./character.coffee')
 
-class MetaString
-  constructor: () ->
-
+module.exports =
   to_character_list: (element) ->
     return @._node_to_character_list(element)
 
@@ -55,7 +54,7 @@ class MetaString
     else
       text = $(node).text()
       if text.length
-        character_list = @._string_to_character_list
+        character_list = @._string_to_character_list text
       else if node.tagName.toLowerCase() of constants.DOM_TAGS
         tag = constants.DOM_TAGS[node.tagName.toLowerCase()]
         character_list = [

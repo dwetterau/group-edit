@@ -22,7 +22,6 @@ echo "Compiling Coffeescript to JS..."
 ./node_modules/.bin/coffee --output ./bin/ --compile ./src/
 
 # Clear out all the client javascript because we're gonna bundle it all.
-# We don't want to do this for tests though...
 #find ./bin/public/javascripts -maxdepth 1 -type f -exec rm {} \;
 #rm -r ./bin/public/javascripts/lib
 

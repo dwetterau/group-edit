@@ -1,6 +1,6 @@
 assert = require('assert')
-diff = require('../../../public/javascripts/lib/diff/diff')
-Character = require('../../../public/javascripts/lib/meta_string/character').Character
+diff = require('../../../public/javascripts/lib/diff/diff.coffee')
+{Character} = require('../../../public/javascripts/lib/meta_string/character.coffee')
 
 describe 'diff_tests', () ->
   string_ab = [new Character('A'), new Character('B')]

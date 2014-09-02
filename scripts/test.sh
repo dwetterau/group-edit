@@ -13,5 +13,10 @@ fi
 # Run the build script
 chmod +x ./scripts/build.sh && ./scripts/build.sh
 
+# Create the master test bundle
+echo "Making test bundles..."
+./node_modules/.bin/browserify --transform coffeeify --debug  \
+./src/tests/all_tests.coffee > ./bin/tests/all_tests.js
+
 echo "Running tests..."
-find ./bin -name "*tests.js" -print0 | xargs -0 ./node_modules/.bin/mocha --reporter spec
+find ./bin -name "all_tests.js" -print0 | xargs -0 ./node_modules/.bin/mocha --reporter spec
