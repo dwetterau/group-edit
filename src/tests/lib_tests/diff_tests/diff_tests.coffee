@@ -7,7 +7,7 @@ describe 'diff_tests', () ->
   string_ba = [new Character('B'), new Character('A')]
   string_abc = [new Character('A'), new Character('B'), new Character('C')]
 
-  describe 'test_index', () ->
+  describe 'test _index', () ->
     it 'should return a simple index object', () ->
       expected =
         row: 0,
@@ -16,7 +16,7 @@ describe 'diff_tests', () ->
       assert.equal index.row, expected.row
       assert.equal index.column, expected.column
 
-  describe 'test_lcs', () ->
+  describe 'test _lcs', () ->
     it 'should return a 1 row matrix for an empty start', () ->
       end = string_ab
       matrix = diff._lcs([], end)
@@ -75,7 +75,7 @@ describe 'diff_tests', () ->
         for c in [0...matrix[r].length]
           assert.equal matrix[r][c].value, expected[r][c]
 
-  describe 'test_backtrack', () ->
+  describe 'test _backtrack', () ->
     it 'should return no operations for empty start and end', () ->
       operations = diff.diff [], []
       assert.equal operations.length, 0
@@ -167,7 +167,7 @@ describe 'diff_tests', () ->
         assert.equal operation[0], expected.ops[index]
         assert operation[1].equals(expected.chars[index])
 
-  describe 'test_compress', () ->
+  describe 'test _compress', () ->
     it 'should return empty on empty', () ->
       operations = diff._compress []
       assert.equal operations.length, 0

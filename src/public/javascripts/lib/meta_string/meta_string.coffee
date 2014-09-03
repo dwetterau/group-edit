@@ -26,21 +26,6 @@ module.exports =
       throw new Error 'Issue parsing character stack'
     return root.innerHTML
 
-  _compress_display_character_list: (character_list) ->
-    # Compress all adjacent text characters together
-    new_character_list = []
-    current_string = ''
-    for character in character_list
-      if character.is_html()
-        if current_string.length
-          new_character_list.append new Character(current_string)
-          current_string = ''
-        new_character_list.push character
-      else
-        current_string += character.display
-    if current_string.length
-      new_character_list.push new Character(current_string)
-    return new_character_list
 
   _node_to_character_list: (node) ->
     character_list = []
@@ -64,6 +49,22 @@ module.exports =
       else
         throw new Error "Could not make character of node"
       return character_list
+
+  _compress_display_character_list: (character_list) ->
+    # Compress all adjacent text characters together
+    new_character_list = []
+    current_string = ''
+    for character in character_list
+      if character.is_html()
+        if current_string.length
+          new_character_list.push new Character(current_string)
+          current_string = ''
+        new_character_list.push character
+      else
+        current_string += character.display
+    if current_string.length
+      new_character_list.push new Character(current_string)
+    return new_character_list
 
   _node_to_tags: (node) ->
     tag = constants.DOM_TAGS[node.tagName.toLowerCase()]
