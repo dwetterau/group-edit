@@ -129,9 +129,9 @@ module.exports =
       type = diff_subarray[0]
       character_list = diff_subarray[1]
       if type == 1
-        this.process_bulk_insert character_list, index, woot_state
+        @.process_bulk_insert character_list, index, woot_state
       else if type == -1
-        this.process_bulk_delete character_list, index, woot_state
+        @.process_bulk_delete character_list, index, woot_state
         index -= character_list.length
       index += character_list.length
 

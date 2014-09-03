@@ -1,8 +1,9 @@
-constants = require './lib/constants.coffee'
-woot = require './lib/woot.coffee'
-utils = require './lib/utils.coffee'
 Character = require('./lib/meta_string/character.coffee').Character
+constants = require './lib/constants.coffee'
 diff = require('./lib/diff/diff.coffee')
+meta_string = require('./lib/meta_string/meta_string.coffee')
+utils = require './lib/utils.coffee'
+woot = require './lib/woot.coffee'
 
 firebase = new Firebase(constants.FIREBASE)
 
@@ -35,13 +36,19 @@ woot_state.events_ref.once 'value', (data) ->
   all_objects = data.val()
   for key, operation_object of all_objects
     unpack_and_push_operation operation_object, operation_list
+  operation_list.reverse()
+  console.log "beginning to process", operation_list.length, "operation(s)."
+  start = new Date()
   while operation_list.length > 0
     utils.process_op operation_list, woot_state.string, woot_state.applied_ops
+  console.log "Initial processing took", (new Date() - start), "ms."
+
   element = $('#input')
-  string_representation = utils.character_list_to_string woot.value woot_state.string
-  element.val string_representation
-  old_value = string_representation
-  utils.set_cursor(element.get(0), string_representation.length)
+  character_list = woot.value woot_state.string
+  element.html(meta_string.to_html character_list)
+  old_value = character_list
+  # FIXME: We need a new way of getting / setting the cursor!
+  #utils.set_cursor(element.get(0), string_representation.length)
 
   # We have to start putting new operations in the real list before we move
   # the pending ones over.
@@ -85,19 +92,19 @@ woot_state.events_ref.on 'child_added', (snapshot, previous_child) ->
     unpack_and_push_operation operation_object, pending_operation_list
 
 onchange_callback = (event) ->
-  before = string_to_character old_value
-  after_text = $('#input').val()
-  after = string_to_character after_text
+  before = old_value
+  after = meta_string.to_character_list this
 
   utils.process_diff diff.diff(before, after), woot_state
-  old_value = after_text
+  old_value = after
 
 $('#input').bind 'input propertychange', onchange_callback
 
 apply_operations = () ->
   # Store the cursor information before we do any operations
   element = $('#input')
-  before_cursor_state = utils.get_cursor_state element.get(0), woot_state.string
+  # FIXME we need a new way of getting the cursor state
+  #before_cursor_state = utils.get_cursor_state element.get(0), woot_state.string
   # Try to process all of the pending operations
   iterations = operation_list.length
   should_update = false
@@ -109,10 +116,12 @@ apply_operations = () ->
   if should_update
     # We need to update the text content with the new value and
     # move the cursor back to where it was...
-    new_value = utils.character_list_to_string woot.value woot_state.string
+    new_value = woot.value woot_state.string
     # Update our old_value first so we don't fire off new diffs
     old_value = new_value
-    element.val new_value
-    utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
+    element.html meta_string.to_html new_value
+
+    # FIXME we need a new way of setting the cursor state
+    # utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
 
 setInterval apply_operations, 100

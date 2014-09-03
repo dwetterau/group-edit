@@ -8,13 +8,13 @@ module.exports =
         name: ''
         number: 0
       visible: false
-      value: new Character()
+      value: {}
     end_character =
       id:
         name: ''
         number: 1
       visible: false
-      value: new Character()
+      value: {}
     return [begin_character, end_character]
 
   length: (string) ->
@@ -57,12 +57,14 @@ module.exports =
     return this.get_position(string, target_id) != -1
 
   value: (string) ->
-    visible_string = []
+    meta_string = []
     for character in string
       if character.visible
-        visible_string.push character.value
+        meta_character = new Character()
+        meta_character.from_json character.value
+        meta_string.push meta_character
 
-    return visible_string
+    return meta_string
 
   ith_visible: (string, index) ->
     index_seen = -1
@@ -84,7 +86,7 @@ module.exports =
         return index_seen
     return index_seen
 
-  generate_insert: (index, string_character, participant_name, sequence_number, string) ->
+  generate_insert: (index, meta_character, participant_name, sequence_number, string) ->
     before_character = this.ith_visible(string, index - 1)
     after_character = this.ith_visible(string, index)
     if not before_character
@@ -96,7 +98,7 @@ module.exports =
         number: sequence_number
         name: participant_name
       visible: true
-      value: string_character
+      value: meta_character.to_json()
       before_id: before_character.id
       after_id: after_character.id
 
