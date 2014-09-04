@@ -36,7 +36,6 @@ woot_state.events_ref.once 'value', (data) ->
   all_objects = data.val()
   for key, operation_object of all_objects
     unpack_and_push_operation operation_object, operation_list
-  operation_list.reverse()
   console.log "beginning to process", operation_list.length, "operation(s)."
   start = new Date()
   while operation_list.length > 0
