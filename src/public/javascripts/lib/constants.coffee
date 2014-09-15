@@ -13,3 +13,7 @@ module.exports =
     div: '<div>'
     br: '<br>'
     p: '<p>'
+    span: '<span>'
+    ul: '<ul>'
+    ol: '<ol>'
+    li: '<li>'

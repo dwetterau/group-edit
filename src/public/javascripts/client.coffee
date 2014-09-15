@@ -13,7 +13,6 @@ events_ref = test_room_ref.child(constants.EVENTS_CHILD)
 
 participants_ref = test_room_ref.child(constants.PARTICIPANTS_CHILD)
 
-
 # Get our unique id from pushing onto the participants ref
 participant_name = participants_ref.push {'new_participant': new Date()}
 participant_name = participant_name.name()
@@ -30,6 +29,10 @@ operation_list = []
 pending_operation_list = []
 initialized = false
 old_value = ''
+
+# Set up the buttons for making lists
+
+
 
 # On page load, load the list of all operations, perform them once.
 woot_state.events_ref.once 'value', (data) ->
