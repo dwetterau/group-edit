@@ -110,8 +110,7 @@ $('#input').bind 'input propertychange', onchange_callback
 apply_operations = () ->
   # Store the cursor information before we do any operations
   element = $('#input')
-  # FIXME we need a new way of getting the cursor state
-  #before_cursor_state = utils.get_cursor_state element.get(0), woot_state.string
+  before_cursor_state = utils.get_cursor_state element.get(0), woot_state.string
   # Try to process all of the pending operations
   iterations = operation_list.length
   should_update = false
@@ -128,7 +127,6 @@ apply_operations = () ->
     old_value = new_value
     element.html meta_string.to_html new_value
 
-    # FIXME we need a new way of setting the cursor state
-    # utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
+    utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
 
 setInterval apply_operations, 100

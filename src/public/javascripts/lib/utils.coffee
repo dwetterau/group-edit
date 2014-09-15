@@ -1,22 +1,17 @@
 woot = require './woot.coffee'
 constants = require './constants.coffee'
+{Character} = require './meta_string/character.coffee'
 
 module.exports =
   get_cursor: (element) ->
-    if element.selectionStart
-      return element.selectionStart
-    else if document.selection
-      element.focus()
-      r = document.selection.createRange()
-      if r == null
-        return 0
-
-      re = element.createTextRange()
-      rc = re.duplicate()
-      re.moveToBookmark r.getBookmark()
-      rc.setEndPoint 'EndToStart', re
-      return rc.text.length
-    return 0
+    # Gets the index of the cursor and the text node it's in
+    if not window.getSelection or window.getSelection().rangeCount <= 0
+      return { index: 0, parent: undefined }
+    range = window.getSelection().getRangeAt(0)
+    return {
+      index: range.endOffset
+      parent: range.commonAncestorContainer
+    }
 
   set_cursor: (element, index) ->
     if element.createTextRange
@@ -31,9 +26,44 @@ module.exports =
         element.focus()
 
   get_cursor_state: (element, string) ->
-    cursor_index = this.get_cursor element
-    after_cursor_character = woot.ith_visible string, cursor_index - 1
-    before_cursor_character = woot.ith_visible string, cursor_index
+    # Traverse down the dom and record what elements we go through to
+    cursor_object = this.get_cursor element
+    enters = 0
+    exits = 0
+
+    depth_search = (node) ->
+      enters++
+      if node == cursor_object.parent
+        return true
+      for child in node.childNodes
+        if depth_search child
+          return true
+      exits++
+      return false
+    depth_search element
+
+    # Enters starts at 1 for the original node.
+    seen_enters = 1
+    seen_exits = 0
+    start_index = 0
+    for woot_character, index in string
+      character = new Character()
+      character.from_json woot_character.value
+      if character.is_html()
+        if character.is_start()
+          seen_enters++
+        else
+          seen_exits++
+      else
+        if seen_enters == enters and seen_exits == exits
+          while start_index != cursor_object.index and index < string.length
+            if string[index].visible
+              start_index++
+            index++
+          if start_index == cursor_object.index
+            before_cursor_character = string[index]
+            after_cursor_character = string[index - 1]
+
     if not after_cursor_character
       after_cursor_character = string[0]
     if not before_cursor_character
@@ -44,17 +74,32 @@ module.exports =
           name: ''
           number: 2 # This is 2 because begin and end character are 0 and 1
         visible: false
-        value: ''
+        value: {}
       before_id: before_cursor_character.id
       after_id: after_cursor_character.id
 
+    if cursor_object.parent
+      debugger
     return cursor_state
 
   set_cursor_state: (element, string, cursor_state) ->
     string_index = woot.determine_insert_position(
       string, cursor_state.character, cursor_state.before_id, cursor_state.after_id)
     new_index = woot.string_index_to_ith string, string_index
-    this.set_cursor element, new_index + 1
+    console.log "new_index"
+    stack = [element]
+    node = undefined
+    total_length = 0
+    while stack.length
+      node = stack.pop()
+      length = $(node).text().length
+      if total_length + length >= new_index
+        break
+      total_length += length
+      for node in node.childNodes.reverse()
+        stack.push node
+
+    this.set_cursor node, new_index - total_length
 
   get_op_key: (operation, character) ->
     return [operation, character.id.name, character.id.number].join('|')
