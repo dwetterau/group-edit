@@ -63,6 +63,7 @@ module.exports =
           if start_index == cursor_object.index
             before_cursor_character = string[index]
             after_cursor_character = string[index - 1]
+          break
 
     if not after_cursor_character
       after_cursor_character = string[0]
