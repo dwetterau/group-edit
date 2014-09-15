@@ -31,8 +31,13 @@ initialized = false
 old_value = ''
 
 # Set up the buttons for making lists
+$('#add_ul').click () ->
+  list = $('<ul><li>&nbsp</li></ul>')
+  $('#input').append list
 
-
+$('#add_ol').click () ->
+  list = $('<ol><li>&nbsp</li></ol>')
+  $('#input').append list
 
 # On page load, load the list of all operations, perform them once.
 woot_state.events_ref.once 'value', (data) ->
