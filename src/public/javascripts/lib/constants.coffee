@@ -17,3 +17,5 @@ module.exports =
     ul: '<ul>'
     ol: '<ol>'
     li: '<li>'
+
+  TEXT_NODE: 3

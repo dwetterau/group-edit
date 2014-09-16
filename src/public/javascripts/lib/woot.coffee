@@ -1,5 +1,5 @@
 constants = require './constants.coffee'
-Character = require('./meta_string/character.coffee').Character
+{Character} = require './meta_string/character.coffee'
 
 module.exports =
   initialize_string: () ->
@@ -75,12 +75,17 @@ module.exports =
         return character
     return null
 
-  string_index_to_ith: (string, string_index) ->
+  string_index_to_ith: (string, string_index, no_html) ->
     index_seen = -1
     string_index_seen = -1
     for character in string
       string_index_seen += 1
       if character.visible
+        if no_html
+          c = new Character()
+          c.from_json(character.value)
+          if c.is_html()
+            continue
         index_seen += 1
       if string_index == string_index_seen
         return index_seen

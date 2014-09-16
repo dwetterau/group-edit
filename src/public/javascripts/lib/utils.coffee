@@ -14,16 +14,15 @@ module.exports =
     }
 
   set_cursor: (element, index) ->
-    if element.createTextRange
-      range = element.createTextRange()
-      range.move 'character', index
-      range.select()
+    if document.createRange()
+      range = document.createRange()
+      selection = window.getSelection()
+      range.setStart(element, index)
+      range.collapse(true)
+      selection.removeAllRanges()
+      selection.addRange(range)
     else
-      if element.selectionStart?
-        element.focus()
-        element.setSelectionRange index, index
-      else
-        element.focus()
+      element.focus()
 
   get_cursor_state: (element, string) ->
     # Traverse down the dom and record what elements we go through to
@@ -32,18 +31,19 @@ module.exports =
     exits = 0
 
     depth_search = (node) ->
-      enters++
+      inc = if node.nodeType == constants.TEXT_NODE > 0 then 0 else 1
+      enters += inc
       if node == cursor_object.parent
         return true
       for child in node.childNodes
         if depth_search child
           return true
-      exits++
+      exits += inc
       return false
     depth_search element
 
     # Enters starts at 1 for the original node.
-    seen_enters = 1
+    seen_enters = 0
     seen_exits = 0
     start_index = 0
     for woot_character, index in string
@@ -79,26 +79,26 @@ module.exports =
       before_id: before_cursor_character.id
       after_id: after_cursor_character.id
 
-    if cursor_object.parent
-      debugger
     return cursor_state
 
   set_cursor_state: (element, string, cursor_state) ->
     string_index = woot.determine_insert_position(
       string, cursor_state.character, cursor_state.before_id, cursor_state.after_id)
-    new_index = woot.string_index_to_ith string, string_index
-    console.log "new_index"
+    new_index = woot.string_index_to_ith string, string_index, true
     stack = [element]
     node = undefined
     total_length = 0
+    debugger
     while stack.length
       node = stack.pop()
-      length = $(node).text().length
+      length = 0
+      if node.nodeType == constants.TEXT_NODE
+        length = $(node).text().length
       if total_length + length >= new_index
         break
       total_length += length
-      for node in node.childNodes.reverse()
-        stack.push node
+      for n in (n for n in node.childNodes).reverse()
+        stack.push n
 
     this.set_cursor node, new_index - total_length
 
