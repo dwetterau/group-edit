@@ -50,10 +50,11 @@ module.exports =
       character = new Character()
       character.from_json woot_character.value
       if character.is_html()
-        if character.is_start()
-          seen_enters++
-        else
-          seen_exits++
+        if constants.DOM_TAGS[character.html.slice(1, character.html.length - 1)].length < 1
+          if character.is_start()
+            seen_enters++
+          else
+            seen_exits++
       else
         if seen_enters == enters and seen_exits == exits
           while start_index != cursor_object.index and index < string.length
