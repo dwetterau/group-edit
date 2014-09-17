@@ -50,7 +50,7 @@ module.exports =
       character = new Character()
       character.from_json woot_character.value
       if character.is_html()
-        if constants.DOM_TAGS[character.html.slice(1, character.html.length - 1)].length < 1
+        if constants.DOM_TAGS[character.html.slice(1, character.html.length - 1)].container
           if character.is_start()
             seen_enters++
           else
@@ -62,14 +62,14 @@ module.exports =
               start_index++
             index++
           if start_index == cursor_object.index
-            before_cursor_character = string[index]
-            after_cursor_character = string[index - 1]
+            before_cursor_character = string[index - 1]
+            after_cursor_character = string[index]
           break
 
-    if not after_cursor_character
-      after_cursor_character = string[0]
     if not before_cursor_character
-      before_cursor_character = string[string.length - 1]
+      before_cursor_character = string[0]
+    if not after_cursor_character
+      after_cursor_character = string[string.length - 1]
     cursor_state =
       character:
         id:
@@ -86,10 +86,17 @@ module.exports =
     string_index = woot.determine_insert_position(
       string, cursor_state.character, cursor_state.before_id, cursor_state.after_id)
     new_index = woot.string_index_to_ith string, string_index, true
+
+    console.log "input cursor_state", cursor_state
+    console.log string_index, new_index
+    console.log string[string_index - 1].value, string[string_index].value,
+      string[string_index + 1].value
+    console.log string
+
     stack = [element]
     node = undefined
-    total_length = 0
-    debugger
+    # This starts at -1 to offset the length added by the first div
+    total_length = -1
     while stack.length
       node = stack.pop()
       length = 0
@@ -97,7 +104,7 @@ module.exports =
         length += constants.DOM_TAGS[node.tagName.toLowerCase()].length
       if node.nodeType == constants.TEXT_NODE
         length += $(node).text().length
-      if total_length + length >= new_index
+      if total_length + length > new_index
         break
       total_length += length
       for n in (n for n in node.childNodes).reverse()

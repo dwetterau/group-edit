@@ -12,24 +12,31 @@ module.exports =
   DOM_TAGS:
     div:
       html: '<div>'
-      length: 0
+      length: 1
+      container: true
     br:
       html: '<br>'
       length: 1
+      container: false
     p:
       html: '<p>'
-      length: 0
+      length: 1
+      container: true
     span:
       html: '<span>'
       length: 0
+      container: false
     ul:
       html: '<ul>'
       length: 0
+      container: true
     ol:
       html: '<ol>'
       length: 0
+      container: true
     li:
       html: '<li>'
       length: 1
+      container: true
 
   TEXT_NODE: 3
