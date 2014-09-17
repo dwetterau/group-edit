@@ -37,10 +37,8 @@ describe 'character_tests', () ->
     it 'should say characters with different is_start are different', () ->
       character_1 = new Character('display', 'html', true)
       character_2 = new Character('display', 'html', false)
-      character_3 = new Character('display', 'html')
       assert not character_1.equals character_2
       assert not character_2.equals character_1
-      assert not character_2.equals character_3
 
   describe 'test is_start', () ->
     it 'should say that characters without is_start set are not start tags', () ->

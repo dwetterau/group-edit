@@ -10,12 +10,26 @@ module.exports =
 
   # DOM constants
   DOM_TAGS:
-    div: '<div>'
-    br: '<br>'
-    p: '<p>'
-    span: '<span>'
-    ul: '<ul>'
-    ol: '<ol>'
-    li: '<li>'
+    div:
+      html: '<div>'
+      length: 0
+    br:
+      html: '<br>'
+      length: 1
+    p:
+      html: '<p>'
+      length: 0
+    span:
+      html: '<span>'
+      length: 0
+    ul:
+      html: '<ul>'
+      length: 0
+    ol:
+      html: '<ol>'
+      length: 0
+    li:
+      html: '<li>'
+      length: 1
 
   TEXT_NODE: 3

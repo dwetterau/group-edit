@@ -34,7 +34,7 @@ describe "meta_string_tests", () ->
 
     it "should return a start and end tag of the tag in the mapping", () ->
       node = tagName: 'DIV'
-      expected_tag = constants.DOM_TAGS[node.tagName.toLowerCase()]
+      expected_tag = constants.DOM_TAGS[node.tagName.toLowerCase()].html
       tags = meta_string._node_to_tags node
       assert (key for own key of tags).length == 2
 

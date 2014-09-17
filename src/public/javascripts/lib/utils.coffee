@@ -79,6 +79,9 @@ module.exports =
       before_id: before_cursor_character.id
       after_id: after_cursor_character.id
 
+    if cursor_object.parent?
+      debugger
+
     return cursor_state
 
   set_cursor_state: (element, string, cursor_state) ->
@@ -92,8 +95,10 @@ module.exports =
     while stack.length
       node = stack.pop()
       length = 0
+      if node.tagName.toLowerCase() of constants.DOM_TAGS
+        length += constants.DOM_TAGS[node.tagName.toLowerCase()].length
       if node.nodeType == constants.TEXT_NODE
-        length = $(node).text().length
+        length += $(node).text().length
       if total_length + length >= new_index
         break
       total_length += length

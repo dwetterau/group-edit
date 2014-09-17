@@ -84,7 +84,8 @@ module.exports =
         if no_html
           c = new Character()
           c.from_json(character.value)
-          if c.is_html()
+          if c.is_html() and c.is_start() and (
+            constants.DOM_TAGS[c.html.slice(1, c.html.length - 1)].length == 0)
             continue
         index_seen += 1
       if string_index == string_index_seen

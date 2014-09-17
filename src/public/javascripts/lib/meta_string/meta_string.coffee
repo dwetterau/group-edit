@@ -14,7 +14,7 @@ module.exports =
 
   to_html: (character_list) ->
     character_list = @._compress_display_character_list character_list
-    root = $(constants.DOM_TAGS['div'])
+    root = $(constants.DOM_TAGS['div'].html)
     node_stack = [root]
     for character in character_list
       parent = node_stack[node_stack.length - 1]
@@ -54,7 +54,7 @@ module.exports =
       if text.length
         character_list = @._string_to_character_list text
       else if node.tagName.toLowerCase() of constants.DOM_TAGS
-        tag = constants.DOM_TAGS[node.tagName.toLowerCase()]
+        tag = constants.DOM_TAGS[node.tagName.toLowerCase()].html
         character_list = [
           new Character('', tag, true)
           new Character('', tag, false)
@@ -83,8 +83,8 @@ module.exports =
     tag = constants.DOM_TAGS[node.tagName.toLowerCase()]
     if tag?
       return {
-        open_tag: new Character('', tag, true)
-        close_tag: new Character('', tag, false)
+        open_tag: new Character('', tag.html, true)
+        close_tag: new Character('', tag.html, false)
       }
     else
       return {}
