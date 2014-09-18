@@ -80,6 +80,12 @@ module.exports =
       before_id: before_cursor_character.id
       after_id: after_cursor_character.id
 
+    if cursor_object.parent
+      console.log cursor_object
+      console.log enters, exits
+      console.log seen_enters, seen_exits
+      console.log cursor_state
+
     return cursor_state
 
   set_cursor_state: (element, string, cursor_state) ->

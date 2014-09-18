@@ -129,4 +129,4 @@ apply_operations = () ->
 
     utils.set_cursor_state element.get(0), woot_state.string, before_cursor_state
 
-setInterval apply_operations, 100
+setInterval apply_operations, 10000
