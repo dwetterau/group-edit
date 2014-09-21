@@ -1,3 +1,5 @@
+Base64 = require 'base64-math'
+
 module.exports =
   FIREBASE_NAME: 'grouped'
   FIREBASE: 'https://grouped.firebaseio.com/'
@@ -40,3 +42,4 @@ module.exports =
       container: true
 
   TEXT_NODE: 3
+  BASE64_ONE: Base64.toBase64(1)
