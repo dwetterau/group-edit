@@ -7,16 +7,19 @@ class Id
       @numerator = ''
       @denominator = ''
       @participant_id = ''
+      return
 
     split = string.split("|")
-    assert split.length == 3
+    if split.length != 3
+      throw new Error "Malformed Id string: " + string
 
     @numerator = split[0]
     @denominator = split[1]
     @participant_id = split[2]
 
   to_string: () ->
-    assert @numerator.length > 0 and @denominator.length > 0 and @participant_id.length > 0
+    if not (@numerator.length > 0 and @denominator.length > 0 and @participant_id.length > 0)
+      throw new Error "Invalid id!"
     return @numerator + "|" + @denominator + "|" + @participant_id
 
   # This method compares two ids and if the first is smaller returns < 0, equal returns 0, bigger

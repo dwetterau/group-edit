@@ -1,3 +1,6 @@
 [submodule "node_modules/base64-math"]
 	path = node_modules/base64-math
 	url = git://github.com/dwetterau/base64-math
+[submodule "node_modules/node-skiplist"]
+	path = node_modules/node-skiplist
+	url = git@github.com:dwetterau/node-skiplist
