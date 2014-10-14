@@ -17,6 +17,9 @@ class Id
     @denominator = split[1]
     @participant_id = split[2]
 
+  copy: () ->
+    return new Id(@numerator + "|" + @denominator + '|' + @participant_id)
+
   to_string: () ->
     if not (@numerator.length > 0 and @denominator.length > 0 and @participant_id.length > 0)
       throw new Error "Invalid id!"
@@ -53,7 +56,7 @@ class Id
       # Shift the denominator over to multiply by 2
       doubled_numerator = Base64.left_shift(left_numerator)
       @numerator = Base64.add(doubled_numerator, constants.BASE64_ONE)
-      @denominator = Base64.right_shift(new_denom)
+      @denominator = Base64.left_shift(new_denom)
 
     # After we have set our new numerator and denominator, be sure to reduce
     @participant_id = participant_id

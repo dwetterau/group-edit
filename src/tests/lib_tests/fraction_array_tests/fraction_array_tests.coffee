@@ -13,8 +13,8 @@ describe "fraction_array_tests", () ->
     it "should be able to insert things", () ->
       participant_id = "participant_id"
       array = new FractionArray()
-      array.insert 0, TestCharacter("b"), participant_id
-      array.insert 1, TestCharacter("c"), participant_id
-      array.insert 0, TestCharacter("a"), participant_id
+      array.insert 0, new TestCharacter("b"), participant_id
+      array.insert 1, new TestCharacter("c"), participant_id
+      array.insert 0, new TestCharacter("a"), participant_id
 
       assert.equal array.to_string(), 'abc'

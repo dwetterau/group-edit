@@ -17,14 +17,8 @@ class FractionArray
     before = @skiplist.rank index
     after = @skiplist.rank index + 1
 
-    console.log "Before:", before.to_string()
-    console.log "After:", after.to_string()
-
-
     new_id = new Id()
     new_id.from_neighbors before, after, participant_id
-
-    console.log "New middle!", new_id.to_string()
 
     @map[new_id.to_string()] = character
     @skiplist.insert new_id
@@ -35,10 +29,17 @@ class FractionArray
     delete @map[id]
 
   to_string: () ->
-    result = ''
+    result = []
     list = @skiplist.to_list()
-    for id in list
-      result.append @map[id].to_string()
+    for id, index in list
+      # We need to skip the first and last element
+      if index == 0
+        continue
+      if index == list.length - 1
+        continue
+
+      result.push @map[id.element.to_string()].to_string()
+    return result.join ''
 
 module.exports =
   FractionArray: FractionArray
