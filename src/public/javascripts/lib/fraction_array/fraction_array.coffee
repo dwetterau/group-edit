@@ -23,10 +23,19 @@ class FractionArray
     @map[new_id.to_string()] = character
     @skiplist.insert new_id
 
+  insert_id: (id, character) ->
+    @map[id.to_string()] = character
+    @skiplist.insert id
+
   remove: (index) ->
     # Note we add one here because of the dummy boundary node
     id = @skiplist.rank index + 1
     @skiplist.remove index + 1
+    delete @map[id]
+
+  remove_id: (id) ->
+    index = @skiplist.find id
+    @skiplist.remove index
     delete @map[id]
 
   to_string: () ->
