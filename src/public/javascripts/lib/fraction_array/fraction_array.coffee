@@ -24,8 +24,9 @@ class FractionArray
     @skiplist.insert new_id
 
   remove: (index) ->
-    id = @skiplist.rank index
-    @skiplist.remove index
+    # Note we add one here because of the dummy boundary node
+    id = @skiplist.rank index + 1
+    @skiplist.remove index + 1
     delete @map[id]
 
   to_string: () ->
