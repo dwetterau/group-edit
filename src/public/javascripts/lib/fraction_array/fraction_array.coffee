@@ -37,8 +37,7 @@ class FractionArray
         continue
       if index == list.length - 1
         continue
-
-      result.push @map[id.element.to_string()].to_string()
+      result.push @map[id.to_string()].to_string()
     return result.join ''
 
 module.exports =
